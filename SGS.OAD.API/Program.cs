@@ -1,4 +1,4 @@
-
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -39,6 +39,9 @@ namespace SGS.OAD.API
                 builder.Services.AddControllers();
                 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
                 builder.Services.AddOpenApi();
+
+                builder.Services.AddHealthChecks()
+                    .AddCheck("Self", () => HealthCheckResult.Healthy("API is running"), tags: new[] { "self" });
 
                 var app = builder.Build();
 
