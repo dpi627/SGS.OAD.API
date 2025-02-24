@@ -1,5 +1,6 @@
 
 using Scalar.AspNetCore;
+using Serilog;
 
 namespace SGS.OAD.API
 {
@@ -9,28 +10,61 @@ namespace SGS.OAD.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // 取得環境變數
+            string environment = builder.Environment.EnvironmentName;
+            string appName = builder.Environment.ApplicationName;
+            string basePath = builder.Environment.ContentRootPath;
 
-            builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            // 設定組態檔
+            builder.Configuration.SetBasePath(basePath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
+                .AddUserSecrets<Program>();
 
-            var app = builder.Build();
+            // 設定 Serilog
+            Log.Logger = new LoggerConfiguration()
+                    .ReadFrom.Configuration(builder.Configuration)
+                    .Enrich.WithProperty("Application", appName) //應用程式名稱不寫於設定檔
+                    .CreateLogger();
 
-            // Configure the HTTP request pipeline.
-            app.MapOpenApi();
-            app.MapScalarApiReference(option => {
-                option.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-            });
+            Log.Information("{Application} 於 {EnvironmentName} 啟動", appName, environment);
 
-            app.UseHttpsRedirection();
+            try
+            {
+                // 清除預設的日誌提供者
+                builder.Logging.ClearProviders();
+                // 使用 Serilog 取代內建的日誌機制
+                builder.Logging.AddSerilog();
 
-            app.UseAuthorization();
+                builder.Services.AddControllers();
+                // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+                builder.Services.AddOpenApi();
 
+                var app = builder.Build();
 
-            app.MapControllers();
+                // Configure the HTTP request pipeline.
+                app.MapOpenApi();
+                app.MapScalarApiReference(option =>
+                {
+                    option.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+                });
 
-            app.Run();
+                app.UseHttpsRedirection();
+
+                app.UseAuthorization();
+
+                app.MapControllers();
+
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "{Application} 異常", appName);
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
     }
 }
