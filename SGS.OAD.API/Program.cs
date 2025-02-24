@@ -1,4 +1,6 @@
 
+using Scalar.AspNetCore;
+
 namespace SGS.OAD.API
 {
     public class Program
@@ -16,10 +18,10 @@ namespace SGS.OAD.API
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-            }
+            app.MapOpenApi();
+            app.MapScalarApiReference(option => {
+                option.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+            });
 
             app.UseHttpsRedirection();
 
