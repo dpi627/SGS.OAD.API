@@ -7,26 +7,38 @@ namespace SGS.OAD.API.Controllers;
 [Route("[controller]")]
 public class AdValidController(ILogger<AdValidController> logger) : ControllerBase
 {
-    [HttpPost]
-    public async Task<ActionResult<bool>> IsValidAsync(string username, string password, string domain = "APAC")
+    [HttpGet]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> IsValidAsync(string UserName, string Password, string Domain = "APAC")
     {
+        if (string.IsNullOrWhiteSpace(UserName)||
+            string.IsNullOrWhiteSpace(Password)||
+            string.IsNullOrWhiteSpace(Domain))
+        {
+            logger.LogWarning("Invalid parameter(s). User: {UserName}", UserName);
+            return BadRequest("Invalid parameter(s).");
+        }
+
         try
         {
-            bool result = await AdAuthHelper.IsValidAsync(username, password, domain);
+            bool valid = await AdAuthHelper.IsValidAsync(UserName, Password, Domain);
 
-            if (!result)
+            if (!valid)
             {
-                logger.LogWarning("Authorization failed.");
-                return Unauthorized("Authorization failed.");
+                logger.LogWarning("Autentication failed. User: {UserName}", UserName);
+                return Unauthorized(valid);
             }
 
-            logger.LogInformation("Authorization succeeded. User: {username}", username);
-            return Ok(result);
+            logger.LogInformation("Autentication passed. User: {UserName}", UserName);
+            return Ok(valid);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while processing your request.");
-            return StatusCode(500, "An error occurred while processing your request.");
+            logger.LogError(ex, "Autentication error. User: {UserName}", UserName);
+            return StatusCode(500, "An error occurred.");
         }
     }
 }
