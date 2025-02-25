@@ -38,26 +38,29 @@ namespace SGS.OAD.API
 
                 builder.Services.AddControllers();
 
-                builder.Services.AddOpenApi(o =>
-                {
-                    o.AddOperationTransformer(async (operation, context, cancellationToken) =>
-                    {
-                        if (operation.Parameters != null)
-                        {
-                            foreach (var param in operation.Parameters)
-                            {
-                                if (param.Name.Equals("password", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    if (param.Schema.Type == "string")
-                                    {
-                                        param.Schema.Format = "password";
-                                    }
-                                }
-                            }
-                        }
-                        await Task.CompletedTask;
-                    });
-                });
+                builder.Services.AddOpenApi();
+
+                // 以下程式可將名稱為 password 的欄位設定為 password 格式，但 scalar ui 無法正確顯示
+                //builder.Services.AddOpenApi(o =>
+                //{
+                //    o.AddOperationTransformer(async (operation, context, cancellationToken) =>
+                //    {
+                //        if (operation.Parameters != null)
+                //        {
+                //            foreach (var param in operation.Parameters)
+                //            {
+                //                if (param.Name.Equals("password", StringComparison.OrdinalIgnoreCase))
+                //                {
+                //                    if (param.Schema.Type == "string")
+                //                    {
+                //                        param.Schema.Format = "password";
+                //                    }
+                //                }
+                //            }
+                //        }
+                //        await Task.CompletedTask;
+                //    });
+                //});
 
                 builder.Services.AddHealthChecks()
                     .AddCheck("Self", () => HealthCheckResult.Healthy("API is running"), tags: ["self"]);
