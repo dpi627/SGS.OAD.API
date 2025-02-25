@@ -23,8 +23,8 @@ public class EmpIdController(ILogger<EmpIdController> logger) : ControllerBase
 
         try
         {
-            var helper = await HrInfoHelper.Create().BuildAsync();
-            var empId = await helper.GetEmpIdAsync(adAccount);
+            var hrInfo = await HrInfoHelper.Create().BuildAsync();
+            var empId = await hrInfo.GetEmpIdAsync(adAccount);
 
             if (empId == default)
             {

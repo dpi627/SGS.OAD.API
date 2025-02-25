@@ -7,13 +7,23 @@ namespace SGS.OAD.API.Controllers;
 [ApiController]
 public class EmpInfoController(ILogger<EmpIdController> logger) : ControllerBase
 {
+    /// <summary>
+    /// 透過 AD 帳號或工號 (二擇一) 取得員工資訊
+    /// </summary>
+    /// <param name="id">AD 帳號或工號</param>
+    /// <param name="idType">識別類型 (AD帳號 或工號)</param>
+    /// <returns>員工資訊</returns>
+    /// <response code="200">成功取得員工資訊</response>
+    /// <response code="400">無效的 ID</response>
+    /// <response code="404">找不到員工資訊</response>
+    /// <response code="500">伺服器錯誤</response>
     [HttpGet]
     [EndpointDescription("透過 AD 帳號或工號 (二擇一) 取得員工資訊")]
     [ProducesResponseType(typeof(Employee), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetEmpInfoAsync(string id, [FromQuery] IdType idType = IdType.AdId)
+    public async Task<IActionResult> GetEmpInfoAsync(string id, IdType idType = IdType.Ad)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -23,8 +33,8 @@ public class EmpInfoController(ILogger<EmpIdController> logger) : ControllerBase
 
         try
         {
-            var helper = await HrInfoHelper.Create().BuildAsync();
-            var emp = idType == IdType.AdId ? await helper.GetByAdIdAsync(id) : await helper.GetByEmpIdAsync(id) ;
+            var hrInfo = await HrInfoHelper.Create().BuildAsync();
+            var emp = idType == IdType.Ad ? await hrInfo.GetByAdIdAsync(id) : await hrInfo.GetByEmpIdAsync(id);
 
             if (emp == default || emp.StfCode == default)
             {
@@ -32,7 +42,7 @@ public class EmpInfoController(ILogger<EmpIdController> logger) : ControllerBase
                 return NotFound($"Can't found EmpInfo. Id: {id}");
             }
 
-            logger.LogInformation("Get EmpInfo: {EmpInfo}", emp);
+            logger.LogInformation("Get EmpInfo: {@EmpInfo}", emp);
             return Ok(emp);
         }
         catch (Exception ex)
@@ -42,9 +52,18 @@ public class EmpInfoController(ILogger<EmpIdController> logger) : ControllerBase
         }
     }
 
+    /// <summary>
+    /// ID類型
+    /// </summary>
     public enum IdType
     {
-        AdId,
-        EmpId
+        /// <summary>
+        /// AD 帳號
+        /// </summary>
+        Ad,
+        /// <summary>
+        /// 工號
+        /// </summary>
+        Emp
     }
 }
