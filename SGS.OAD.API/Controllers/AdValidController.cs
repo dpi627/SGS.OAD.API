@@ -12,32 +12,32 @@ public class AdValidController(ILogger<AdValidController> logger) : ControllerBa
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(bool), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> IsValidAsync(string UserName, string Password, string Domain = "APAC")
+    public async Task<IActionResult> IsValidAsync(string userName, string password, string domain = "APAC")
     {
-        if (string.IsNullOrWhiteSpace(UserName)||
-            string.IsNullOrWhiteSpace(Password)||
-            string.IsNullOrWhiteSpace(Domain))
+        if (string.IsNullOrWhiteSpace(userName)||
+            string.IsNullOrWhiteSpace(password)||
+            string.IsNullOrWhiteSpace(domain))
         {
-            logger.LogWarning("Invalid parameter(s). User: {UserName}", UserName);
+            logger.LogWarning("Invalid parameter(s). User: {UserName}", userName);
             return BadRequest("Invalid parameter(s).");
         }
 
         try
         {
-            bool valid = await AdAuthHelper.IsValidAsync(UserName, Password, Domain);
+            bool valid = await AdAuthHelper.IsValidAsync(userName, password, domain);
 
             if (!valid)
             {
-                logger.LogWarning("Autentication failed. User: {UserName}", UserName);
+                logger.LogWarning("Autentication failed. User: {UserName}", userName);
                 return Unauthorized(valid);
             }
 
-            logger.LogInformation("Autentication passed. User: {UserName}", UserName);
+            logger.LogInformation("Autentication passed. User: {UserName}", userName);
             return Ok(valid);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Autentication error. User: {UserName}", UserName);
+            logger.LogError(ex, "Autentication error. User: {UserName}", userName);
             return StatusCode(500, "An error occurred.");
         }
     }
