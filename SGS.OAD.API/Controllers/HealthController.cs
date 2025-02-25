@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using SGS.OAD.API.Models;
 
 namespace SGS.OAD.API.Controllers;
 
@@ -9,33 +10,42 @@ public class HealthController(HealthCheckService healthCheckService, ILogger<Hea
 {
     [HttpGet]
     [EndpointDescription("檢查 API 健康狀態")]
+    [ProducesResponseType(typeof(HealthModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> GetHealth()
     {
-        logger.LogInformation("Health check requested");
-
-        var report = await healthCheckService.CheckHealthAsync();
-
-        var result = new
+        try
         {
-            status = report.Status.ToString(),
-            checks = report.Entries.Select(e => new
+            var report = await healthCheckService.CheckHealthAsync();
+
+            var result = new HealthModel
             {
-                name = e.Key,
-                status = e.Value.Status.ToString(),
-                duration = e.Value.Duration,
-                description = e.Value.Description
-            })
-        };
+                Status = report.Status.ToString(),
+                Checks = report.Entries.Select(e => new Checks
+                {
+                    Name = e.Key,
+                    Status = e.Value.Status.ToString(),
+                    Duration = e.Value.Duration.ToString(),
+                    Description = e.Value.Description
+                }).FirstOrDefault()
+            };
 
-        if (report.Status == HealthStatus.Healthy)
-        {
-            logger.LogInformation("Health check completed: {Status}", report.Status);
-            return Ok(result);
+            if (report.Status == HealthStatus.Healthy)
+            {
+                logger.LogInformation("Health check completed: Status: {Status}, Report: {@report}", report.Status, report);
+                return Ok(result);
+            }
+            else
+            {
+                logger.LogWarning("Health check completed with issues: {Status}, Report: {@report}", report.Status, report);
+                return StatusCode(503, result); // 503 for non-healthy status
+            }
         }
-        else
+        catch (Exception ex)
         {
-            logger.LogWarning("Health check completed with issues: {Status}", report.Status);
-            return StatusCode(503, result); // 503 Service Unavailable for non-healthy status
+            logger.LogError(ex, "An error occurred.");
+            return StatusCode(500, "An error occurred.");
         }
     }
 }
