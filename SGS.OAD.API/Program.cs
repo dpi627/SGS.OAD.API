@@ -41,7 +41,7 @@ namespace SGS.OAD.API
                 builder.Services.AddOpenApi();
 
                 builder.Services.AddHealthChecks()
-                    .AddCheck("Self", () => HealthCheckResult.Healthy("API is running"), tags: new[] { "self" });
+                    .AddCheck("Self", () => HealthCheckResult.Healthy("API is running"), tags: ["self"]);
 
                 var app = builder.Build();
 
