@@ -37,8 +37,27 @@ namespace SGS.OAD.API
                 builder.Logging.AddSerilog();
 
                 builder.Services.AddControllers();
-                // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-                builder.Services.AddOpenApi();
+
+                builder.Services.AddOpenApi(o =>
+                {
+                    o.AddOperationTransformer(async (operation, context, cancellationToken) =>
+                    {
+                        if (operation.Parameters != null)
+                        {
+                            foreach (var param in operation.Parameters)
+                            {
+                                if (param.Name.Equals("password", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (param.Schema.Type == "string")
+                                    {
+                                        param.Schema.Format = "password";
+                                    }
+                                }
+                            }
+                        }
+                        await Task.CompletedTask;
+                    });
+                });
 
                 builder.Services.AddHealthChecks()
                     .AddCheck("Self", () => HealthCheckResult.Healthy("API is running"), tags: ["self"]);
