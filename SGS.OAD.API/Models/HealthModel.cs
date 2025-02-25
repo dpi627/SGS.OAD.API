@@ -1,6 +1,5 @@
 ﻿#nullable disable
 
-
 namespace SGS.OAD.API.Models;
 
 public class HealthModel
