@@ -12,31 +12,31 @@ public class EmpIdController(ILogger<EmpIdController> logger) : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetEmpIdAsync(string AdAccount)
+    public async Task<IActionResult> GetEmpIdAsync(string adAccount)
     {
-        if (string.IsNullOrWhiteSpace(AdAccount))
+        if (string.IsNullOrWhiteSpace(adAccount))
         {
-            logger.LogWarning("Invalid AdAccount: {AdAccount}", AdAccount);
+            logger.LogWarning("Invalid AdAccount: {AdAccount}", adAccount);
             return BadRequest("Invalid AdAccount.");
         }
 
         try
         {
             var helper = await HrInfoHelper.Create().BuildAsync();
-            var empId = await helper.GetEmpIdAsync(AdAccount);
+            var empId = await helper.GetEmpIdAsync(adAccount);
 
             if (empId == default)
             {
-                logger.LogWarning("Can't found EmpId. AdAccount: {AdAccount}", AdAccount);
-                return NotFound($"Can't found EmpId. AdAccount: {AdAccount}");
+                logger.LogWarning("Can't found EmpId. AdAccount: {AdAccount}", adAccount);
+                return NotFound($"Can't found EmpId. AdAccount: {adAccount}");
             }
 
-            logger.LogInformation("Get EmpId: {EmpId}", helper);
+            logger.LogInformation("Get EmpId: {EmpId}", empId);
             return Ok(empId);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred. AdAccount: {AdAccount}", AdAccount);
+            logger.LogError(ex, "An error occurred. AdAccount: {AdAccount}", adAccount);
             return StatusCode(500, "An error occurred.");
         }
     }
