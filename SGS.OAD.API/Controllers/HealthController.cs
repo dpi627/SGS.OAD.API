@@ -8,6 +8,7 @@ namespace SGS.OAD.API.Controllers;
 public class HealthController(HealthCheckService healthCheckService, ILogger<HealthController> logger) : ControllerBase
 {
     [HttpGet]
+    [EndpointDescription("檢查 API 健康狀態")]
     public async Task<IActionResult> GetHealth()
     {
         logger.LogInformation("Health check requested");

@@ -9,6 +9,7 @@ namespace SGS.OAD.API.Controllers;
 public class AdInfoController(ILogger<AdValidController> logger) : ControllerBase
 {
     [HttpPost]
+    [EndpointDescription("透過 AD 帳號與密碼，取得部分 AD 資訊")]
     [ProducesResponseType(typeof(AdInfoModel), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]

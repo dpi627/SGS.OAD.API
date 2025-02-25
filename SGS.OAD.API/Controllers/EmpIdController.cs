@@ -8,6 +8,7 @@ namespace SGS.OAD.API.Controllers;
 public class EmpIdController(ILogger<EmpIdController> logger) : ControllerBase
 {
     [HttpGet]
+    [EndpointDescription("透過 AD 帳號，取得員工資訊")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]

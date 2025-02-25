@@ -8,6 +8,7 @@ namespace SGS.OAD.API.Controllers;
 public class AdValidController(ILogger<AdValidController> logger) : ControllerBase
 {
     [HttpGet]
+    [EndpointDescription("透過 AD 帳號與密碼進行 AD 驗證")]
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(bool), StatusCodes.Status401Unauthorized)]
