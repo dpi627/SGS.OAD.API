@@ -4,30 +4,41 @@ using SGS.OAD.API.Models;
 
 namespace SGS.OAD.API.Controllers;
 
-[Route("[controller]")]
 [ApiController]
+[Route("[controller]")]
 public class AdInfoController(ILogger<AdValidController> logger) : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<AdInfoModel>> GetAdInfoAsync(AdValidModel model)
+    [ProducesResponseType(typeof(AdInfoModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetAdInfoAsync(AdValidModel model)
     {
+        if (!ModelState.IsValid)
+        {
+            model.Password = string.Empty;
+            logger.LogWarning("Invalid model state. Model: {model}", model);
+            return BadRequest("Invalid model state.");
+        }
+
         try
         {
-            var result = await AdAuthHelper.GetInfoAsync(model.UserName, model.Password, model.Domain);
+            var helper = await AdAuthHelper.GetInfoAsync(model.UserName, model.Password, model.Domain);
 
-            if (result == default)
+            if (helper == default)
             {
-                logger.LogWarning("Authorization failed.");
-                return Unauthorized("Authorization failed.");
+                logger.LogWarning("Can't find AdInfo. User: {UserName}", model.UserName);
+                return Unauthorized($"Can't find AdInfo. User: {model.UserName}");
             }
 
-            logger.LogInformation("Get User: {@UserInfo}", result);
-            return Ok(result);
+            logger.LogInformation("Found AdInfo: {@AdInfo}", helper);
+            return Ok(helper);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while processing your request.");
-            return StatusCode(500, "An error occurred while processing your request.");
+            logger.LogError(ex, "Error occurred. User: {username}", model.UserName);
+            return StatusCode(500, "Error occurred.");
         }
     }
 }
