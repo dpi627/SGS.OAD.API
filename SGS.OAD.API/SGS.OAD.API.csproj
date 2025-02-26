@@ -18,4 +18,21 @@
     <PackageReference Include="SGS.OAD.HrInfo" Version="25.2.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="appsettings.Development.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Debug 模式需要帶出 Development 設定 -->
+    <None Update="appsettings.Development.json" Condition="'$(Configuration)' == 'Debug'">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+
+    <!-- Release 或 Publish 時就不帶出此檔案 -->
+    <None Update="appsettings.Development.json" Condition="'$(Configuration)' == 'Release'">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
 </Project>
