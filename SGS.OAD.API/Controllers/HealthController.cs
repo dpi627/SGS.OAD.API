@@ -10,7 +10,7 @@ public class HealthController(HealthCheckService healthCheckService, ILogger<Hea
 {
     [HttpGet]
     [EndpointDescription("檢查 API 健康狀態")]
-    [ProducesResponseType(typeof(HealthModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(HealthRequest), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> GetHealth()
@@ -19,7 +19,7 @@ public class HealthController(HealthCheckService healthCheckService, ILogger<Hea
         {
             var report = await healthCheckService.CheckHealthAsync();
 
-            var result = new HealthModel
+            var result = new HealthRequest
             {
                 Status = report.Status.ToString(),
                 Checks = report.Entries.Select(e => new Checks

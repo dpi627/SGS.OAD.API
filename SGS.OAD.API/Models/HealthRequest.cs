@@ -2,7 +2,7 @@
 
 namespace SGS.OAD.API.Models;
 
-public class HealthModel
+public class HealthRequest
 {
     public string Status { get; set; }
     public Checks Checks { get; set; }
