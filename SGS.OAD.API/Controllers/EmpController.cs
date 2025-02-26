@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SGS.OAD.HrInfo;
+using System.ComponentModel.DataAnnotations;
 
 namespace SGS.OAD.API.Controllers;
 
@@ -7,13 +8,13 @@ namespace SGS.OAD.API.Controllers;
 [ApiController]
 public class EmpController(ILogger<EmpController> logger) : ControllerBase
 {
-    [HttpGet]
-    [EndpointDescription("透過 AD 帳號取得工號")]
+    [HttpGet("{adAccount}")]
+    [EndpointDescription("透過 AD 帳號取得 員工編號(工號)")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetEmpIdAsync(string adAccount)
+    public async Task<IActionResult> GetEmpIdAsync([FromRoute] string adAccount)
     {
         if (string.IsNullOrWhiteSpace(adAccount))
         {
@@ -52,18 +53,18 @@ public class EmpController(ILogger<EmpController> logger) : ControllerBase
     /// <response code="400">無效的 ID</response>
     /// <response code="404">找不到員工資訊</response>
     /// <response code="500">伺服器錯誤</response>
-    [HttpPost]
-    [EndpointDescription("透過 AD 帳號或工號 (二擇一) 取得員工資訊")]
+    [HttpGet("{idType}/{id}")]
+    [EndpointDescription("透過 AD 帳號或工號(二擇一)，取得開放員工資訊(無個資)")]
     [ProducesResponseType(typeof(Employee), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetEmpInfoAsync(string id, IdType idType = IdType.Ad)
+    public async Task<IActionResult> GetEmpInfoAsync(string id, [EnumDataType(typeof(IdType))] IdType idType = IdType.Ad)
     {
-        if (string.IsNullOrWhiteSpace(id))
+        if (!Enum.IsDefined(idType) || string.IsNullOrWhiteSpace(id))
         {
-            logger.LogWarning("Invalid Id: {Id}", id);
-            return BadRequest("Invalid Id.");
+            logger.LogWarning("Invalid IdType: {IdType} or Id: {Id}", idType, id);
+            return BadRequest("Invalid IdType or Id.");
         }
 
         try
