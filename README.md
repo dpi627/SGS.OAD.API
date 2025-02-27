@@ -32,7 +32,8 @@
 
 - 採用 Controller，非 Minium API
 - `nuget.config` 定義了內部 NuGet pacakage source
-- ⚠️部署時需確認<small>(或修改)</small> `appsettings.Production.json` 之 Base URL
+
+>⚠️ 部署時需確認<small>(或修改)</small> `appsettings.Production.json` 之 Base URL
 
 # 🌐 UAT
 
@@ -40,6 +41,7 @@ https://twtpeoad001.sgs.net/api/scalar/
 
 
 > 💡使用 [Scalar](https://scalar.com/) 作為測試介面
+
 
 # 📌 Endpoints
 
